@@ -1,24 +1,61 @@
 package org.example;
 
+import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
+import org.springframework.core.io.ClassPathResource;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 public class JdbcUtil {
 
-    private static String url="jdbc:postgresql://192.168.88.85:5432/awp?currentSchema=awp_dev";
-    private static String username="iw";
-    private static String password="iw123";
-    private static String driverClassName = "org.postgresql.Driver";
+    private static final String URL;
+    private static final String USERNAME;
+    private static final String PASSWORD;
+    private static final String DRIVER_CLASS_NAME;
 
-    static  {
+    static {
         try {
-            Class.forName(driverClassName);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException("数据库驱动加载失败", e);
+            Properties properties = loadYamlProperties();
+            URL = getRequiredProperty(properties, "spring.datasource.url");
+            USERNAME = getRequiredProperty(properties, "spring.datasource.username");
+            PASSWORD = getRequiredProperty(properties, "spring.datasource.password");
+            DRIVER_CLASS_NAME = getRequiredProperty(properties, "spring.datasource.driver-class-name");
+            Class.forName(DRIVER_CLASS_NAME);
+        } catch (Exception e) {
+            throw new ExceptionInInitializerError(
+                    new IllegalStateException("数据库配置或驱动加载失败", e)
+            );
         }
+    }
+
+    private JdbcUtil() {
+    }
+
+    private static Properties loadYamlProperties() {
+        ClassPathResource resource = new ClassPathResource("application.yml");
+        if (!resource.exists()) {
+            throw new IllegalStateException("类路径下未找到 application.yml");
+        }
+
+        YamlPropertiesFactoryBean yamlFactory = new YamlPropertiesFactoryBean();
+        yamlFactory.setResources(resource);
+        Properties properties = yamlFactory.getObject();
+        if (properties == null) {
+            throw new IllegalStateException("application.yml 读取失败");
+        }
+        return properties;
+    }
+
+    private static String getRequiredProperty(Properties properties, String key) {
+        String value = properties.getProperty(key);
+        if (value == null || value.isBlank()) {
+            throw new IllegalStateException("application.yml 缺少配置项: " + key);
+        }
+        return value;
     }
 
 
@@ -90,9 +127,9 @@ public class JdbcUtil {
             throws SQLException {
 
         return DriverManager.getConnection(
-                url,
-                username,
-                password
+                URL,
+                USERNAME,
+                PASSWORD
         );
     }
 

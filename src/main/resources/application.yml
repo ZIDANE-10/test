@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:postgresql://192.168.88.85:5432/awp?currentSchema=awp_dev
-    username: iw
-    password: iw123
+    url: jdbc:postgresql://43.173.167.127:30000/jian?currentSchema=jian
+    username: jian
+    password: W2e3r4t5
     driver-class-name: org.postgresql.Driver
 
 
