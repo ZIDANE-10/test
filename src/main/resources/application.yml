@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://192.168.88.85:5432/awp?currentSchema=awp_dev
+    username: iw
+    password: iw123
+    driver-class-name: org.postgresql.Driver
+
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+  mapper-locations: classpath:mapper/*.xml
